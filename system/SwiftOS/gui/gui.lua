@@ -1,7 +1,6 @@
 local buffer = require("NyaDraw")
 local GUI = require("GUI")
 local computer = require("computer")
-local themes = require("get_them")
 local fs = require('filesystem')
 local event = require('event')
 local unicode = require('unicode')
@@ -33,7 +32,6 @@ daemon_net = event.listen('modem_message', function( _, _, from, port, _, messag
 end)
 
 end
-css_ref()
 local window1Container, window1Panel
 
  mainContainer = GUI.application()

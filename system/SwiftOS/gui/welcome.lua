@@ -44,7 +44,6 @@ post_install:addChild(ends).onTouch = function()
 	local identity = GUI.roundedButton(4, 10, 53, 3, button_def, button_text, button_active, button_text, 'Нажмите для идентификации')
 	post_install2:addChild(identity).eventHandler = function (main, win, evn, _, x, y, _, pll)
 		if evn == 'touch' then
-		fs.makeDirectory('/Users/')
 		fs.makeDirectory('/Users/' .. pll .. '/')
 		fs.makeDirectory('/Users/' .. pll .. '/Contacts/')
 		fs.makeDirectory('/Users/' .. pll .. '/Documents/')

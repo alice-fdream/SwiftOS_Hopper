@@ -1,62 +1,41 @@
+local ser = require('serialization')
+
 function css_ref()
 local fils = io.open('/system/SwiftOS/themes/current_theme.dll')
 local object = fils:read()
 fils:close()
 
+local fils = io.open('/system/SwiftOS/themes/list/' .. object .. '/data')
+local arrays = fils:read()
+fils:close()
 
-local css = io.open("/system/SwiftOS/themes/list/" .. object .. "/backgr")
-backgr = tonumber(css:read())
-css:close()
-
-local css = io.open("/system/SwiftOS/themes/list/" .. object .. "/text")
-text = tonumber(css:read())
-css:close()
-
-local css = io.open("/system/SwiftOS/themes/list/" .. object .. "/close_button")
-close_button = tonumber(css:read())
-css:close()
-
-local css = io.open("/system/SwiftOS/themes/list/" .. object .. "/shadow_window")
-shadow_window = tonumber(css:read())
-css:close()
+local th = ser.unserialize(arrays)
 
 
-local css = io.open("/system/SwiftOS/themes/list/" .. object .. "/button_def")
-button_def = tonumber(css:read())
-css:close()
+backgr = tonumber(th[1])
 
-local css = io.open("/system/SwiftOS/themes/list/" .. object .. "/button_text")
-button_text = tonumber(css:read())
-css:close()
+text = tonumber(th[13])
 
+close_button = tonumber(th[5])
 
-local css = io.open("/system/SwiftOS/themes/list/" .. object .. "/button_active")
-button_active = tonumber(css:read())
-css:close()
+shadow_window = tonumber(th[12])
 
-local css = io.open("/system/SwiftOS/themes/list/" .. object .. "/main_text")
-main_text = tonumber(css:read())
-css:close()
+button_def = tonumber(th[3])
 
-local css = io.open("/system/SwiftOS/themes/list/" .. object .. "/input_back")
-input_back = tonumber(css:read())
-css:close()
+button_text = tonumber(th[4])
 
-local css = io.open("/system/SwiftOS/themes/list/" .. object .. "/input_back_focused")
-input_back_foc = tonumber(css:read())
-css:close()
+button_active = tonumber(th[2])
 
-local css = io.open("/system/SwiftOS/themes/list/" .. object .. "/colorDesktop")
-colorDesktop = tonumber(css:read())
-css:close()
+main_text = tonumber(th[11])
 
-local css = io.open("/system/SwiftOS/themes/list/" .. object .. "/dock_apps")
-dock_apps = tonumber(css:read())
-css:close()
+input_back = tonumber(th[8])
 
-local css = io.open("/system/SwiftOS/themes/list/" .. object .. "/input_text")
-input_text = tonumber(css:read())
-css:close()
+input_back_foc = tonumber(th[9])
 
+colorDesktop = tonumber(th[6])
+
+dock_apps = tonumber(th[7])
+
+input_text = tonumber(th[10])
 
 end
