@@ -1,0 +1,3 @@
+SwiftOS log: user: [alice_fdream] /system/systemDATA/auth/auth.lua:54: Ошибка запуска рабочего стола /system/apps/shell/shell.lua:75: Failed to perform loadfile() : /system/systemDATA/binares/add-user:26: 'end' expected (to close 'if' at line 10) near 'else' 
+SwiftOS log: user: [alice_fdream] /system/systemDATA/auth/auth.lua:54: Ошибка запуска рабочего стола /system/SwiftOS/gui/gui.lua:94: Failed to perform pcall() : /system/SwiftOS/update/main.lua:28: no primary internet card found 
+SwiftOS log: user: [alice_fdream] /system/systemDATA/auth/auth.lua:54: Ошибка запуска рабочего стола interrupted 

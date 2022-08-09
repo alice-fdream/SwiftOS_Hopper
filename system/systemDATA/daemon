@@ -1,0 +1,45 @@
+
+local GUI = require("GUI")
+local buffer = require("NyaDraw")
+local computer = require("computer")
+local fs = require("filesystem")
+local event = require("event")
+local unicode = require('unicode')
+local modem = require('component').modem
+local serializ = require('serialization')
+
+local data = ...
+local mainContainer = data[1]
+local get = serializ.unserialize(data[4])
+
+ -- {IPUP, KEY, IPDOWN}
+ 
+ swift = get[4]
+
+if get[1] == os.getenv('IP') then
+
+	if get[2] == 'sms' then
+		message = GUI.container(mainContainer.width-43, 3, 40, 10)
+		local panel = GUI.panel (1, 1, message.width-1, message.height-1, backgr)
+		message:addChild (panel)
+		message:addChild (GUI.label (2, 2, panel.width, 1, text, "Сообщение от"))
+		message:addChild (GUI.label (4, 3, panel.width, 1, text, swift[1]))
+		message:addChild (GUI.label (2, 5, panel.width, 1, text, "Содержимое:"))
+		message:addChild (GUI.label (3, 6, panel.width, 1, text, swift[2]))
+		message:addChild(GUI.panel(2, message.height, panel.width, 1, shadow_window))
+		message:addChild(GUI.panel(message.width, 2, 1, panel.height-1, shadow_window))
+		message.touchX, message.touchY = 0, 0
+
+		message:addChild(GUI.roundedButton (message.width-4, 1, 3, 3, close_button, button_text, button_active, button_text, 'X')).onTouch = function ()
+			message:remove()
+			mainContainer:draw()
+		end
+		
+	mainContainer:addChild (message)
+	mainContainer:draw()
+		computer.beep(1500)
+		computer.beep(1500)
+		computer.beep(1500)
+		computer.beep(1500)
+	end
+end

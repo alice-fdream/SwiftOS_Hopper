@@ -1,0 +1,11 @@
+local computer = require('computer')
+require('swift_term')
+
+if args[2] == '-a' then
+pr("SwiftOS " .. os.getenv('VER'))
+pr(" User: " .. os.getenv('PLA'))
+pr( " RAM: " .. computer.totalMemory() .. ' Byte')
+
+else
+pr("I haven't args. Stop")
+end

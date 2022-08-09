@@ -1,0 +1,29 @@
+local fs = require('filesystem')
+--
+require('swift_term')
+--
+
+if args[2] ~= nil then
+	pr('Arguments found, created thread')
+	pr('Checking if the user exists')
+
+	if fs.exists('/Users/' .. args[2] .. '/') ~= true then
+		pr('User not exists. NEXT')
+		pr('Create work directory ... ')
+		fs.makeDirectory('/Users/' .. args[2] .. '/')
+		pr('Create contacts ... ')
+		fs.makeDirectory('/Users/' .. args[2] .. '/Contacts/')
+		pr('Create Documents ... ')
+		fs.makeDirectory('/Users/' .. args[2] .. '/Documents/')
+		pr('Create share folder ... ')
+		fs.makeDirectory('/Users/' .. args[2] .. '/lipSync/')
+		pr('Create project work directory ...')
+		fs.makeDirectory('/Users/' .. args[2] .. '/Projects/')
+		pr('User was created!')
+		
+	else
+			pr('User already exists. STOP')
+		end
+	else
+		pr('Not found argument. STOP')
+	end

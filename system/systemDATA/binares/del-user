@@ -1,0 +1,20 @@
+local fs = require('filesystem')
+--
+require('swift_term')
+--
+
+if args[2] ~= nil then
+	pr('Arguments found, created thread')
+	pr('Checking if the user exists')
+
+	if fs.exists('/Users/' .. args[2] .. '/') == true then
+		pr('User exists. NEXT')
+		pr('Delete user .. ')
+		fs.remove('/Users/' .. args[2] .. '/')
+		pr('OK')
+	else
+			pr('Delete nothing blin')
+		end
+	else
+		pr('Not found argument. STOP')
+	end

@@ -1,0 +1,3 @@
+local unicode = require('unicode')
+
+pr(unicode.sub(com.text, 5, -1))

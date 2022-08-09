@@ -1,0 +1,81 @@
+local fs = require('filesystem')
+local net = require('internet')
+local unicode = require('unicode')
+
+require('swift_term')
+
+  if args[2] == 'install' then
+    if fs.exists('/system/systemDATA/repo/' .. args[3]) == true then
+      pr("I'm was found repository!")
+      local rep = io.open('/system/systemDATA/repo/' .. args[3])
+      repo = rep:read()
+      rep:close()
+      pr("Search program ...")
+      local status, handle = pcall(net.request(repo .. args[4] .. '/check'))
+      if status == true then
+        pr('Program ' .. args[4] .. ' for SwiftOS was found')
+        local handle = net.request(repo .. args[4] .. '/check')
+        local result = ""
+        for chunk in handle do result = result..chunk end
+        local fill = unicode.sub(result, 1, -2)
+        files={}
+        for str in string.gmatch(fill, "([^%s]+)") do
+            table.insert(files, str)
+        end
+        fs.makeDirectory('/system/apps/' .. args[4] .. '/')
+        for _, url in pairs(files) do
+          os.execute('wget ' .. repo .. '/' .. url .. ' /system/apps/' .. url)
+          pr('> ' .. url .. ' installation')
+        end
+          pr('Program ' .. args[4] .. ' was installed')
+      else
+        pr('Program ' .. args[4] .. ' for SwiftOS wasnt found. Stop')
+      end
+
+    else
+      pr("Repository don't created. Stop")
+    end
+  end
+
+if args[2] == 'add-repos' then
+  if args[3] ~= nil then
+    if fs.exists('/system/systemDATA/repo/' .. args[3]) == true then
+      pr('Repository already exist. STOP')
+    else
+      pr('Repository already not exist. NEXT')
+      pr('Created file repository | write raw-url')
+      os.execute('touch /system/systemDATA/repo/' .. args[3])
+      mainContainer:draw(true)
+      repka = io.open('/system/systemDATA/repo/' .. args[3], 'w')
+      repka:write(args[4])
+      repka:close()
+      pr(' DONE!')
+    end
+  else
+    pr('Repository not entered. STOP')
+  end
+end
+
+if args[2] == 'del-repos' then
+  if args[3] ~= nil then
+    if fs.exists('/system/systemDATA/repo/' .. args[3]) == true then
+      pr('Repository already exist. NEXT')
+      os.execute('rm -r /system/systemDATA/repo/' .. args[3])
+      pr(' DONE')
+    else
+      pr('Repository already not exist. STOP')
+    end
+  end
+end
+
+if args[2] == 'delete' then
+  if args[3] ~= nil then
+    if fs.exists('/system/apps/' .. args[3]) == true then
+      pr('Delete program ' .. args[3])
+      os.execute('rm -r /system/apps/' .. args[3] .. '/')
+      pr('OK')
+    end
+  else
+    pr('Not program')
+  end
+end
