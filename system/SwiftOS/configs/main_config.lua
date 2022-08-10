@@ -3,7 +3,11 @@ local tty = require("tty")
 local fs = require("filesystem")
 local gpu = require('component').gpu
 local term = require('term')
+local gpu = require('component').gpu
 
+gpu.setBackground(0x3f096d)
+gpu.setForeground(0x000000)
+term.clear()
 
 if tty.isAvailable() then
   if io.stdout.tty then
@@ -46,7 +50,6 @@ end
 
 
 if ch1 == '0' or ch1 == nil or ch1 == 0 then
-term.clear()
 os.execute('/system/SwiftOS/gui/welcome.lua')
 else
   os.execute('/system/systemDATA/auth/auth.lua')
