@@ -4,6 +4,7 @@ local fs = require("filesystem")
 local gpu = require('component').gpu
 local term = require('term')
 local gpu = require('component').gpu
+local string = require('string')
 
 gpu.setBackground(0x3f096d)
 gpu.setForeground(0x000000)
@@ -43,7 +44,7 @@ ch:close()
 
 if ip == nil then
 local id_ip = io.open('/system/SwiftOS/configs/ip', 'w')
-local dates = math.random(22, 200) .. '.' .. math.random(22, 200) .. '.' .. math.random(1, 50) .. '.' .. math.random(1, 100)
+local dates = string.format("%.0f", math.random(22, 200)) .. '.' .. string.format("%.0f",math.random(22, 200)) .. '.' .. string.format("%.0f",math.random(1, 50)) .. '.' .. string.format("%.0f",math.random(1, 100))
 id_ip:write(dates)
 id_ip:close()
 end
