@@ -43,7 +43,7 @@ local function status(msg)
   if gpu and screen then
   	component.invoke(gpu, "setForeground", 0x00ff00)
   	if y < 20 then
-  		loa = string.rep("─", y*2.5)
+  		loa = string.rep("─", math.floor(y*2.5))
   	else
   		loa = string.rep("─", 50)
   	end
