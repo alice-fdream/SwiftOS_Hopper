@@ -19,7 +19,7 @@ modem.open(1184)
 
 daemon_net = event.listen('modem_message', function( _, _, from, port, _, message)
   data = {mainContainer, from, port, message, daemon_net}
-  
+
     local result, reason = loadfile('/system/systemDATA/daemon')
       if result then
         result, reason = pcall(result, data)
@@ -98,7 +98,18 @@ osx:addItem ("Обновление SwiftOS").onTouch = function()
 end
 
 osx:addSeparator()
-osx:addItem ("Выйти").onTouch     = function () mainContainer:stop() os.execute('/system/systemDATA/auth/auth.lua') end
+osx:addItem ("Выйти").onTouch     = function () mainContainer:stop()
+  local result, reason = loadfile('/system/systemDATA/auth/auth.lua')
+    if result then
+      result, reason = pcall(result, mainContainer)
+        mainContainer:draw(true)
+      if not result then
+       error("Failed to perform pcall() : " .. reason)
+   end
+  else
+   error("Failed to perform loadfile() : " .. reason)
+   end
+end
 osx:addItem ("Выключить").onTouch     = function () computer.shutdown ()     end
 osx:addItem ("Перезагрузить").onTouch = function ()
 computer.shutdown (true)
