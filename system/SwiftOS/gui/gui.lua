@@ -99,6 +99,7 @@ end
 
 osx:addSeparator()
 osx:addItem ("Выйти").onTouch     = function () mainContainer:stop()
+  event.ignore(daemon_net)
   local result, reason = loadfile('/system/systemDATA/auth/auth.lua')
     if result then
       result, reason = pcall(result, mainContainer)
