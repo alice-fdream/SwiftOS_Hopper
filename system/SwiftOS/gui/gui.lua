@@ -99,7 +99,7 @@ end
 
 osx:addSeparator()
 osx:addItem ("Выйти").onTouch     = function () mainContainer:stop()
-  event.ignore(daemon_net)
+  event.cancel(daemon_net)
   local result, reason = loadfile('/system/systemDATA/auth/auth.lua')
     if result then
       result, reason = pcall(result, mainContainer)
@@ -141,20 +141,20 @@ end
 
 
 
- mainContainer:addChild (GUI.image (66, 46, buffer.loadImage("/system/systemDATA/images/setting.pic"))).eventHandler = function (main, win, evn, _, x, y)
- if evn == 'touch' then
-   local result, reason = loadfile('/system/SwiftOS/settings/main.lua')
-     if result then
-       result, reason = pcall(result, mainContainer)
-         mainContainer:draw(true)
-       if not result then
-        error("Failed to perform pcall() : " .. reason)
-    end
-   else
-    error("Failed to perform loadfile() : " .. reason)
-    end
- end
+mainContainer:addChild (GUI.image (66, 46, buffer.loadImage("/system/apps/disk/disk_panel.pic"))).eventHandler = function (main, win, evn, _, x, y)
+if evn == 'touch' then
+  local result, reason = loadfile('/system/apps/disk/disk.lua')
+    if result then
+      result, reason = pcall(result, mainContainer)
+        mainContainer:draw(true)
+      if not result then
+       error("Failed to perform pcall() : " .. reason)
    end
+  else
+   error("Failed to perform loadfile() : " .. reason)
+   end
+end
+  end
 
 
    mainContainer:addChild (GUI.image (77, 46, buffer.loadImage("/system/systemDATA/images/contacts.pic"))).eventHandler = function (main, win, evn, _, x, y)
