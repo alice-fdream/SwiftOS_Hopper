@@ -14,6 +14,8 @@ buffer.drawChanges = buffer.update
 css_ref()
 -----------------------------------------------------------------------------------------
 
+
+
 local GUI = {
 	ALIGNMENT_HORIZONTAL_LEFT = 1,
 	ALIGNMENT_HORIZONTAL_CENTER = 2,
@@ -780,6 +782,12 @@ function GUI.roundedButton(...)
 	return button
 end
 
+function GUI.SwiftButton(x, y, w, h, title)
+	local button = GUI.roundedButton (x, y, w, h, button_def, button_text, button_active, button_text, title)
+	return button
+end
+
+
 function GUI.adaptiveRoundedButton(...)
 	local button = adaptiveButtonCreate(...)
 	button.draw = roundedButtonDraw
@@ -844,6 +852,21 @@ function GUI.label(x, y, width, height, textColor, text)
 	object:setAlignment(GUI.ALIGNMENT_HORIZONTAL_LEFT, GUI.ALIGNMENT_VERTICAL_TOP)
 	object.colors = {text = textColor}
 	object.text = text
+	object.draw = drawLabel
+
+	return object
+end
+
+function GUI.SwiftText(x, y, twt)
+	width = mainContainer.width
+	height = 1
+	textColor = text
+	local object = GUI.object(x, y, width, height)
+
+	object.setAlignment = GUI.setAlignment
+	object:setAlignment(GUI.ALIGNMENT_HORIZONTAL_LEFT, GUI.ALIGNMENT_VERTICAL_TOP)
+	object.colors = {text = textColor}
+	object.text = twt
 	object.draw = drawLabel
 
 	return object
@@ -990,7 +1013,7 @@ local function codeViewDraw(codeView)
 	codeView.codeAreaPosition = codeView.x + codeView.lineNumbersWidth
 	codeView.codeAreaWidth = codeView.width - codeView.lineNumbersWidth
 	-- Line numbers
-	buffer.drawRectangle(codeView.x, codeView.y, codeView.lineNumbersWidth, codeView.height, colorScheme.lineNumbersBackground, colorScheme.lineNumbersText, " ")	
+	buffer.drawRectangle(codeView.x, codeView.y, codeView.lineNumbersWidth, codeView.height, colorScheme.lineNumbersBackground, colorScheme.lineNumbersText, " ")
 	-- Background
 	buffer.drawRectangle(codeView.codeAreaPosition, codeView.y, codeView.codeAreaWidth, codeView.height, colorScheme.background, colorScheme.text, " ")
 	-- Line numbers texts
@@ -3212,253 +3235,6 @@ function GUI.brailleCanvas(x, y, width, height)
 	return brailleCanvas
 end
 
---------------------------------------------------------------------------------
-
-local function paletteShow(palette)
-	local application = GUI.application()
-
-	application:addChild(palette)
-
-	palette.submitButton.onTouch = function()
-		application:stop()
-	end
-	palette.cancelButton.onTouch = palette.submitButton.onTouch
-
-	application:draw()
-	application:start()
-
-	return palette.color.integer
-end
-
-function GUI.palette(x, y, startColor)
-	local palette = GUI.window(x, y, 71, 25)
-
-	palette.color = {hsb = {}, rgb = {}}
-	palette:addChild(GUI.panel(1, 1, palette.width, palette.height, 0xF0F0F0))
-
-	local bigImage = palette:addChild(GUI.image(1, 1, image.create(50, 25)))
-	local bigCrest = palette:addChild(GUI.object(1, 1, 5, 3))
-
-	local function paletteDrawBigCrestPixel(x, y, symbol)
-		local background, foreground = buffer.get(x, y)
-		local r, g, b = color.integerToRGB(background)
-		buffer.set(x, y, background, (r + g + b) / 3 >= 127 and 0x0 or 0xFFFFFF, symbol)
-	end
-
-	bigCrest.draw = function(object)
-		paletteDrawBigCrestPixel(object.x, object.y + 1, "─")
-		paletteDrawBigCrestPixel(object.x + 1, object.y + 1, "─")
-		paletteDrawBigCrestPixel(object.x + 3, object.y + 1, "─")
-		paletteDrawBigCrestPixel(object.x + 4, object.y + 1, "─")
-		paletteDrawBigCrestPixel(object.x + 2, object.y, "│")
-		paletteDrawBigCrestPixel(object.x + 2, object.y + 2, "│")
-	end
-	bigCrest.passScreenEvents = true
-
-	local miniImage = palette:addChild(GUI.image(53, 1, image.create(3, 25)))
-
-	local miniCrest = palette:addChild(GUI.object(52, 1, 5, 1))
-	miniCrest.draw = function(object)
-		buffer.drawText(object.x, object.y, 0x0, ">")
-		buffer.drawText(object.x + 4, object.y, 0x0, "<")
-	end
-
-	local colorPanel = palette:addChild(GUI.panel(58, 2, 12, 3, 0x0))
-	palette.submitButton = palette:addChild(GUI.roundedButton(58, 6, 12, 1, 0x4B4B4B, 0xFFFFFF, 0x2D2D2D, 0xFFFFFF, "OK"))
-	palette.cancelButton = palette:addChild(GUI.roundedButton(58, 8, 12, 1, 0xFFFFFF, 0x696969, 0x2D2D2D, 0xFFFFFF, "Cancel"))
-
-	local function paletteRefreshBigImage()
-		local saturationStep, brightnessStep, saturation, brightness = 1 / bigImage.width, 1 / bigImage.height, 0, 1
-		for j = 1, bigImage.height do
-			for i = 1, bigImage.width do
-				image.set(bigImage.image, i, j, color.optimize(color.HSBToInteger(palette.color.hsb.hue, saturation, brightness)), 0x0, 0x0, " ")
-				saturation = saturation + saturationStep
-			end
-			saturation, brightness = 0, brightness - brightnessStep
-		end
-	end
-
-	local function paletteRefreshMiniImage()
-		local hueStep, hue = 360 / miniImage.height, 0
-		for j = 1, miniImage.height do
-			for i = 1, miniImage.width do
-				image.set(miniImage.image, i, j, color.optimize(color.HSBToInteger(hue, 1, 1)), 0x0, 0, " ")
-			end
-			hue = hue + hueStep
-		end
-	end
-
-	local function paletteUpdateCrestsCoordinates()
-		bigCrest.localX = math.floor((bigImage.width - 1) * palette.color.hsb.saturation) - 1
-		bigCrest.localY = math.floor((bigImage.height - 1) - (bigImage.height - 1) * palette.color.hsb.brightness)
-		miniCrest.localY = math.ceil(palette.color.hsb.hue / 360 * miniImage.height + 0.5)
-	end
-
-	local inputs
-
-	local function paletteUpdateInputs()
-		inputs[1].text = tostring(palette.color.rgb.red)
-		inputs[2].text = tostring(palette.color.rgb.green)
-		inputs[3].text = tostring(palette.color.rgb.blue)
-		inputs[4].text = tostring(math.floor(palette.color.hsb.hue))
-		inputs[5].text = tostring(math.floor(palette.color.hsb.saturation * 100))
-		inputs[6].text = tostring(math.floor(palette.color.hsb.brightness * 100))
-		inputs[7].text = string.format("%06X", palette.color.integer)
-		colorPanel.colors.background = palette.color.integer
-	end
-
-	local function paletteSwitchColorFromHex(hex)
-		palette.color.integer = hex
-		palette.color.rgb.red, palette.color.rgb.green, palette.color.rgb.blue = color.integerToRGB(hex)
-		palette.color.hsb.hue, palette.color.hsb.saturation, palette.color.hsb.brightness = color.RGBToHSB(palette.color.rgb.red, palette.color.rgb.green, palette.color.rgb.blue)
-		paletteUpdateInputs()
-	end
-
-	local function paletteSwitchColorFromHsb(hue, saturation, brightness)
-		palette.color.hsb.hue, palette.color.hsb.saturation, palette.color.hsb.brightness = hue, saturation, brightness
-		palette.color.rgb.red, palette.color.rgb.green, palette.color.rgb.blue = color.HSBToRGB(hue, saturation, brightness)
-		palette.color.integer = color.RGBToInteger(palette.color.rgb.red, palette.color.rgb.green, palette.color.rgb.blue)
-		paletteUpdateInputs()
-	end
-
-	local function paletteSwitchColorFromRgb(red, green, blue)
-		palette.color.rgb.red, palette.color.rgb.green, palette.color.rgb.blue = red, green, blue
-		palette.color.hsb.hue, palette.color.hsb.saturation, palette.color.hsb.brightness = color.RGBToHSB(red, green, blue)
-		palette.color.integer = color.RGBToInteger(red, green, blue)
-		paletteUpdateInputs()
-	end
-
-	local function onAnyInputFinished()
-		paletteRefreshBigImage()
-		paletteUpdateCrestsCoordinates()
-		palette.firstParent:draw()
-	end
-
-	local function onHexInputFinished()
-		paletteSwitchColorFromHex(tonumber("0x" .. inputs[7].text))
-		onAnyInputFinished()
-	end
-
-	local function onRgbInputFinished()
-		paletteSwitchColorFromRgb(tonumber(inputs[1].text), tonumber(inputs[2].text), tonumber(inputs[3].text))
-		onAnyInputFinished()
-	end
-
-	local function onHsbInputFinished()
-		paletteSwitchColorFromHsb(tonumber(inputs[4].text), tonumber(inputs[5].text) / 100, tonumber(inputs[6].text) / 100)
-		onAnyInputFinished()
-	end
-
-	local function rgbValidaror(text)
-		local number = tonumber(text) if number and number >= 0 and number <= 255 then return true end
-	end
-
-	local function hValidator(text)
-		local number = tonumber(text) if number and number >= 0 and number <= 359 then return true end
-	end
-
-	local function sbValidator(text)
-		local number = tonumber(text) if number and number >= 0 and number <= 100 then return true end
-	end
-
-	local function hexValidator(text)
-		if string.match(text, "^[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F]$") then
-			return true
-		end
-	end
-
-	inputs = {
-		{ shortcut = "R:", validator = rgbValidaror, onInputFinished = onRgbInputFinished },
-		{ shortcut = "G:", validator = rgbValidaror, onInputFinished = onRgbInputFinished },
-		{ shortcut = "B:", validator = rgbValidaror, onInputFinished = onRgbInputFinished },
-		{ shortcut = "H:", validator = hValidator,   onInputFinished = onHsbInputFinished },
-		{ shortcut = "S:", validator = sbValidator,  onInputFinished = onHsbInputFinished },
-		{ shortcut = "L:", validator = sbValidator,  onInputFinished = onHsbInputFinished },
-		{ shortcut = "0x", validator = hexValidator, onInputFinished = onHexInputFinished }
-	}
-
-	local y = 10
-	for i = 1, #inputs do
-		palette:addChild(GUI.label(58, y, 2, 1, 0x0, inputs[i].shortcut))
-
-		local validator, onInputFinished = inputs[i].validator, inputs[i].onInputFinished
-		inputs[i] = palette:addChild(GUI.input(61, y, 9, 1, 0xFFFFFF, 0x696969, 0x696969, 0xFFFFFF, 0x0, "", "", true))
-		inputs[i].validator = validator
-		inputs[i].onInputFinished = onInputFinished
-
-		y = y + 2
-	end
-
-	local favourites
-	if filesystem.exists(GUI.PALETTE_CONFIG_PATH) then
-		favourites = table.fromFile(GUI.PALETTE_CONFIG_PATH)
-	else
-		favourites = {}
-		for i = 1, 6 do favourites[i] = color.HSBToInteger(math.random(0, 360), 1, 1) end
-		table.toFile(GUI.PALETTE_CONFIG_PATH, favourites)
-	end
-
-	local favouritesContainer = palette:addChild(GUI.container(58, 24, 12, 1))
-	for i = 1, #favourites do
-		favouritesContainer:addChild(GUI.button(i * 2 - 1, 1, 2, 1, favourites[i], 0x0, 0x0, 0x0, " ")).onTouch = function(application)
-			paletteSwitchColorFromHex(favourites[i])
-			paletteRefreshBigImage()
-			paletteUpdateCrestsCoordinates()
-			application:draw()
-		end
-	end
-
-	palette:addChild(GUI.button(58, 25, 12, 1, 0xFFFFFF, 0x4B4B4B, 0x2D2D2D, 0xFFFFFF, "+")).onTouch = function(application)
-		local favouriteExists = false
-		for i = 1, #favourites do
-			if favourites[i] == palette.color.integer then
-				favouriteExists = true
-				break
-			end
-		end
-
-		if not favouriteExists then
-			table.insert(favourites, 1, palette.color.integer)
-			table.remove(favourites, #favourites)
-			for i = 1, #favourites do
-				favouritesContainer.children[i].colors.default.background = favourites[i]
-				favouritesContainer.children[i].colors.pressed.background = 0x0
-			end
-
-			table.toFile(GUI.PALETTE_CONFIG_PATH, favourites)
-
-			application:draw()
-		end
-	end
-
-	bigImage.eventHandler = function(application, object, e1, e2, e3, e4)
-		if e1 == "touch" or e1 == "drag" then
-			bigCrest.localX, bigCrest.localY = e3 - palette.x - 1, e4 - palette.y
-			paletteSwitchColorFromHex(select(3, component.gpu.get(e3, e4)))
-			application:draw()
-		end
-	end
-
-	miniImage.eventHandler = function(application, object, e1, e2, e3, e4)
-		if e1 == "touch" or e1 == "drag" then
-			miniCrest.localY = e4 - palette.y + 1
-			paletteSwitchColorFromHsb((e4 - miniImage.y) * 360 / miniImage.height, palette.color.hsb.saturation, palette.color.hsb.brightness)
-			paletteRefreshBigImage()
-			application:draw()
-		end
-	end
-
-	palette.show = paletteShow
-
-	paletteSwitchColorFromHex(startColor)
-	paletteUpdateCrestsCoordinates()
-	paletteRefreshBigImage()
-	paletteRefreshMiniImage()
-
-	return palette
-end
-
---------------------------------------------------------------------------------
 
 local function textUpdate(object)
 	object.width = unicode.len(object.text)
@@ -4275,56 +4051,42 @@ local function windowClose(window)
 	window.firstParent:draw()
 end
 
-function GUI.window(x, y, width, height)
-	local window = GUI.container(x, y, width, height)
+function GUI.window(x, y, title)
 
-	window.passScreenEvents = false
+	local window = GUI.container((math.floor(mainContainer.width/2))-(math.floor(x/2)), (math.floor(mainContainer.height/2))-(math.floor(y/2)), x, y)
 
-	window.resize = windowResize
-	window.maximize = windowMaximize
-	window.minimize = windowMinimize
-	window.close = windowClose
-	window.eventHandler = windowEventHandler
-	window.draw = windowDraw
+	local panel = GUI.panel (1, 1, window.width-1, window.height-1, backgr)
+	window:addChild (panel)
+	window:addChild (GUI.label (2, 2, panel.width, 1, text, title))
+	window:addChild(GUI.panel(2, window.height, panel.width, 1, shadow_window))
+	window:addChild(GUI.panel(window.width, 2, 1, panel.height-1, shadow_window))
+	window.touchX, window.touchY = 0, 0
 
-	return window
-end
+	window:addChild(GUI.roundedButton (window.width-4, 1, 3, 3, close_button, button_text, button_active, button_text, 'X')).onTouch = function ()
+	    window:remove()
+	    mainContainer:draw()
 
-function GUI.filledWindow(x, y, width, height, backgroundColor)
-	local window = GUI.window(x, y, width, height)
-
-	window.backgroundPanel = window:addChild(GUI.panel(1, 1, width, height, backgroundColor))
-	window.actionButtons = window:addChild(GUI.actionButtons(2, 2, true))
-
-	return window
-end
-
-function GUI.titledWindow(x, y, width, height, title, addTitlePanel)
-	local window = GUI.filledWindow(x, y, width, height, GUI.WINDOW_BACKGROUND_PANEL_COLOR)
-
-	if addTitlePanel then
-		window.titlePanel = window:addChild(GUI.panel(1, 1, width, 1, GUI.WINDOW_TITLE_BACKGROUND_COLOR))
-		window.backgroundPanel.localY, window.backgroundPanel.height = 2, window.height - 1
 	end
 
-	window.titleLabel = window:addChild(GUI.label(1, 1, width, height, GUI.WINDOW_TITLE_TEXT_COLOR, title)):setAlignment(GUI.ALIGNMENT_HORIZONTAL_CENTER, GUI.ALIGNMENT_VERTICAL_TOP)
-	window.actionButtons.localY = 1
-	window.actionButtons:moveToFront()
+
+	window.eventHandler = function(text_calc, win, evname, _, x, y)
+	  if evname == "touch" then
+	    win.touchX, win.touchY = x, y
+		 win:moveToFront()
+	    text_calc:draw()
+	  elseif evname == "drag" then
+	    win.localX = ((x > win.touchX) and win.localX + 1) or ((x < win.touchX) and win.localX - 1) or win.localX
+	    win.localY = ((y > win.touchY) and win.localY + 1) or ((y < win.touchY) and win.localY - 1) or win.localY
+	    win.touchX, win.touchY = x, y
+	    text_calc:draw()
+	  end
+	end
+
 
 	return window
 end
 
-function GUI.tabbedWindow(x, y, width, height, ...)
-	local window = GUI.filledWindow(x, y, width, height, GUI.WINDOW_BACKGROUND_PANEL_COLOR)
 
-	window.tabBar = window:addChild(GUI.tabBar(1, 1, window.width, 3, 2, 0, GUI.WINDOW_TAB_BAR_DEFAULT_BACKGROUND_COLOR, GUI.WINDOW_TAB_BAR_DEFAULT_TEXT_COLOR, GUI.WINDOW_TAB_BAR_DEFAULT_BACKGROUND_COLOR, GUI.WINDOW_TAB_BAR_DEFAULT_TEXT_COLOR, GUI.WINDOW_TAB_BAR_SELECTED_BACKGROUND_COLOR, GUI.WINDOW_TAB_BAR_SELECTED_TEXT_COLOR, true))
-
-	window.backgroundPanel.localY, window.backgroundPanel.height = 4, window.height - 3
-	window.actionButtons:moveToFront()
-	window.actionButtons.localY = 2
-
-	return window
-end
 
 ---------------------------------------------------------------------------------------------------
 
